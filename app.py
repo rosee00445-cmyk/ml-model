@@ -8,11 +8,17 @@ model = pickle.load(open('model.pkl', 'rb'))
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.json
+    try:
+        data = request.json['data']
+        
+        # IMPORTANT: 2D format for sklearn
+        result = model.predict([[data]])
+        
+        return jsonify({'prediction': int(result[0])})
 
-    lat = data['latitude']
-    lon = data['longitude']
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
-    result = model.predict([[lat, lon]])
-
-    return jsonify({'prediction': int(result[0])})
+# for Render deployment
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
